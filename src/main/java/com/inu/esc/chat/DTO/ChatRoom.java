@@ -1,0 +1,24 @@
+package com.inu.esc.chat.DTO;
+
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.Data;
+
+import java.util.HashMap;
+
+@Data
+@Table(schema = "esc", name = "chat_room")
+@Entity
+public class ChatRoom {
+    @Id
+    private String roomId;
+    @Column
+    private String roomName;
+    @Column
+    private long userCount;
+
+
+}
