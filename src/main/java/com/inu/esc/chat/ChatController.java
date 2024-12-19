@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.inu.esc.chat.DTO.ChatDTO;
 import com.inu.esc.chat.DTO.ChatRoom;
+import com.inu.esc.chat.DTO.Notification;
 import com.inu.esc.chat.DTO.ResponseDTO;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -14,7 +15,6 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,12 +40,29 @@ public class ChatController {
         if(chatService.isExistUserInRoom(chatDTO.getUserId(), roomId)) {
             chatDTO.setUserName(chatService.getUserByUserId(chatDTO.getUserId(), roomId).getUserName());
         }
-
+        chatService.saveChat(chatDTO);
         simpMessagingTemplate.convertAndSend("/sub/message/"+roomId,chatDTO);
         return chatDTO;
     }
+    @PostMapping("/notification/")
+    public ResponseDTO sendNotification(@RequestBody Notification notification) {
+        try{
+            simpMessagingTemplate.convertAndSend("/sub/notification",notification);
+            return new ResponseDTO(200,notification);
+        }catch (Exception e) {
+            return new ResponseDTO(400,e.getMessage());
+        }
+    }
     @GetMapping("/Room/{roomId}")
     public ResponseDTO getRoomById(@PathVariable("roomId") String roomId) {
+        try{
+            return new ResponseDTO(200,chatService.findByRoomId(roomId));
+        }catch (Exception e) {
+            return new ResponseDTO(400,e.getMessage());
+        }
+    }
+    @GetMapping("/GetChatData/${roomId}")
+    public ResponseDTO getRoomChatData(@PathVariable("roomId") String roomId) {
         try{
             return new ResponseDTO(200,chatService.findByRoomId(roomId));
         }catch (Exception e) {
@@ -65,10 +82,8 @@ public class ChatController {
     @GetMapping("/Room/userId/{userId}")
     public ResponseDTO getAllRoomList(@PathVariable("userId") String userId) {
         try{
-
             List<ChatRoom> chatRoomList=chatService.findAllRoom();
             List<HashMap<String,String>> chatRoomHashList = new ArrayList<>();
-
             for(ChatRoom chatRoom : chatRoomList) {
                 HashMap<String,String> json= new HashMap<>();
                 chatService.getUserByUserId(userId, chatRoom.getRoomId());
@@ -80,7 +95,6 @@ public class ChatController {
                     json.put("username",chatService.getUserByUserId(userId, chatRoom.getRoomId()).getUserName());
                     chatRoomHashList.add(json);
                 }
-
             }
             return new ResponseDTO(200,chatRoomHashList);
         }catch (Exception e) {
@@ -94,9 +108,9 @@ public class ChatController {
     @PostMapping("/JoinRoom")
     public ResponseDTO joinRoom(@RequestBody ChatListEntity chatListEntity) {
         try {
-           String UUID = chatService.addUser(chatListEntity.getRoomId(), chatListEntity.getUserName(),chatListEntity.getUserId());
+           chatService.addUser(chatListEntity.getRoomId(), chatListEntity.getUserName(),chatListEntity.getUserId());
            HashMap<String,String> res = new HashMap<>();
-           return new ResponseDTO(200,res);
+           return new ResponseDTO(200,"success");
         }catch (Exception e) {
             return new ResponseDTO(400,e.getMessage());
         }
@@ -105,6 +119,4 @@ public class ChatController {
     public ResponseDTO leaveRoom(@RequestBody ChatListEntity chatListEntity) {
         return chatService.deleteUser(chatListEntity.getRoomId(), chatListEntity.getUserId());
     }
-
-
 }
