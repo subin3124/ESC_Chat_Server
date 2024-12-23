@@ -26,4 +26,6 @@ public class ChatDTO {
     private String message;
     @Column
     private String time;
+    @Column
+    private boolean isBlock;
 }

@@ -54,6 +54,13 @@ public class ChatService {
         increaseUser(roomId);
         return userId;
     }
+    public ResponseDTO getChatById(long chatId) {
+        try{
+            return new ResponseDTO(200, chatRepository.findChatDTOById(chatId));
+        }catch (Exception e) {
+            return new ResponseDTO(400,e.getMessage());
+        }
+    }
     @Transactional
     public ResponseDTO saveChat(ChatDTO chatDTO) {
         try{
@@ -93,5 +100,22 @@ public class ChatService {
     }
     public List<ChatListEntity> getUserList(String roomId) {
         return chatUserListRepository.findChatListEntitiesByRoomId(roomId);
+    }
+    @Transactional
+    public ResponseDTO setBlock(Long ChatId) {
+        try{
+            if(!chatRepository.existsById(ChatId)) {
+                return new ResponseDTO(400,"not exist chat");
+            }
+            ChatDTO chatDTO = chatRepository.findChatDTOById(ChatId);
+            chatDTO.setBlock(true);
+            chatRepository.updateChatDTOById(chatDTO);
+            return new ResponseDTO(200,chatDTO);
+        }catch (Exception e)  {
+            return new ResponseDTO(400,e.getMessage());
+        }
+    }
+    public List<ChatDTO> getBlockChatList() {
+        return chatRepository.findChatDTOSByBlock(true);
     }
 }

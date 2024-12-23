@@ -61,10 +61,26 @@ public class ChatController {
             return new ResponseDTO(400,e.getMessage());
         }
     }
-    @GetMapping("/GetChatData/${roomId}")
+    @GetMapping("/GetChatData/{roomId}")
     public ResponseDTO getRoomChatData(@PathVariable("roomId") String roomId) {
         try{
             return new ResponseDTO(200,chatService.findByRoomId(roomId));
+        }catch (Exception e) {
+            return new ResponseDTO(400,e.getMessage());
+        }
+    }
+    @GetMapping("/Room/GetUserList/{roomId}")
+    public ResponseDTO getUserList(@PathVariable("roomId") String roomId) {
+        try{
+            return new ResponseDTO(200,chatService.getUserList(roomId));
+        }catch (Exception e) {
+            return new ResponseDTO(400,e.getMessage());
+        }
+    }
+    @GetMapping("/Manage/getBlockLists")
+    public ResponseDTO getBlockList() {
+        try{
+            return new ResponseDTO(200,chatService.getBlockChatList());
         }catch (Exception e) {
             return new ResponseDTO(400,e.getMessage());
         }
