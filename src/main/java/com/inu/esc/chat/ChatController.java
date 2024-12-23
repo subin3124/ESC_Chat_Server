@@ -28,6 +28,8 @@ public class ChatController {
     ChatService chatService;
     @Autowired
     SimpMessagingTemplate simpMessagingTemplate;
+    @Autowired
+    NotificationService notificationService;
 
     @MessageMapping("/messages/{roomId}")
     public ChatDTO send(String data, @DestinationVariable("roomId") String roomId) throws ParseException {
@@ -47,8 +49,17 @@ public class ChatController {
     @PostMapping("/notification/")
     public ResponseDTO sendNotification(@RequestBody Notification notification) {
         try{
-            simpMessagingTemplate.convertAndSend("/sub/notification",notification);
+            Notification savedNotification = notificationService.saveNotification(notification);
+            simpMessagingTemplate.convertAndSend("/sub/notification",savedNotification);
             return new ResponseDTO(200,notification);
+        }catch (Exception e) {
+            return new ResponseDTO(400,e.getMessage());
+        }
+    }
+    @GetMapping("/notification")
+    public ResponseDTO getNotification() {
+        try{
+            return new ResponseDTO(200,notificationService.getAllNotifications());
         }catch (Exception e) {
             return new ResponseDTO(400,e.getMessage());
         }
