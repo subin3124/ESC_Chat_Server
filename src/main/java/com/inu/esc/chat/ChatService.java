@@ -25,10 +25,11 @@ public class ChatService {
     public ChatRoom findByRoomId(String roomId) {
         return chatRoomRepository.findChatRoomByRoomId(roomId);
     }
+    public List<ChatRoom> findRoomByMode(String mode) {
+        return chatRoomRepository.findChatRoomsByMode(mode);
+    }
     @Transactional
-    public ChatRoom createChatRoom(String roomName) {
-        ChatRoom chatRoom = new ChatRoom();
-        chatRoom.setRoomName(roomName);
+    public ChatRoom createChatRoom(ChatRoom chatRoom) {
         chatRoom.setRoomId(UUID.randomUUID().toString());
         return chatRoomRepository.save(chatRoom);
     }
@@ -37,6 +38,12 @@ public class ChatService {
     }
     public ChatListEntity getUserByUserId(String userId,String roomId) {
        return chatUserListRepository.findChatListEntityByUserIdAndRoomId(userId,roomId);
+    }
+    public List<ChatRoom> getTelByOpened() {
+        return chatRoomRepository.findChatRoomsByModeAndisTel("Opened",true);
+    }
+    public List<ChatListEntity> getRoomListByUserId(String userId) {
+        return chatUserListRepository.findChatListEntitiesByUserId(userId);
     }
     private void increaseUser(String roomId) {
         chatRoomRepository.increaseUser(roomId);
@@ -109,7 +116,7 @@ public class ChatService {
             }
             ChatDTO chatDTO = chatRepository.findChatDTOById(ChatId);
             chatDTO.setBlock(true);
-            chatRepository.updateChatDTOById(chatDTO);
+            chatRepository.save(chatDTO);
             return new ResponseDTO(200,chatDTO);
         }catch (Exception e)  {
             return new ResponseDTO(400,e.getMessage());

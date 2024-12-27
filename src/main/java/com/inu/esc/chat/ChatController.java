@@ -16,10 +16,7 @@ import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 @CrossOrigin("*")
 @RestController
@@ -33,15 +30,13 @@ public class ChatController {
 
     @MessageMapping("/messages/{roomId}")
     public ChatDTO send(String data, @DestinationVariable("roomId") String roomId) throws ParseException {
+        System.out.println("받음"+data);
         ChatDTO chatDTO = new ChatDTO();
         JSONObject object = (JSONObject) new JSONParser().parse(data);
         chatDTO.setUserId(object.get("userId").toString());
         chatDTO.setRoomId(object.get("roomId").toString());
         chatDTO.setMessage(object.get("message").toString());
         chatDTO.setTime(LocalDateTime.now().toString());
-        if(chatService.isExistUserInRoom(chatDTO.getUserId(), roomId)) {
-            chatDTO.setUserName(chatService.getUserByUserId(chatDTO.getUserId(), roomId).getUserName());
-        }
         chatService.saveChat(chatDTO);
         simpMessagingTemplate.convertAndSend("/sub/message/"+roomId,chatDTO);
         return chatDTO;
@@ -75,7 +70,7 @@ public class ChatController {
     @GetMapping("/GetChatData/{roomId}")
     public ResponseDTO getRoomChatData(@PathVariable("roomId") String roomId) {
         try{
-            return new ResponseDTO(200,chatService.findByRoomId(roomId));
+            return new ResponseDTO(200,chatService.loadChat(roomId));
         }catch (Exception e) {
             return new ResponseDTO(400,e.getMessage());
         }
@@ -97,10 +92,9 @@ public class ChatController {
         }
     }
     @PostMapping("/Room")
-    public ResponseDTO createNewRoom(@RequestBody HashMap<String, String> data) {
+    public ResponseDTO createNewRoom(@RequestBody ChatRoom chatRoom) {
         try {
-            String roomName = data.get("roomName");
-            ChatRoom chatRoom = chatService.createChatRoom(roomName);
+            chatService.createChatRoom(chatRoom);
             return new ResponseDTO(200,chatRoom);
         }catch (Exception e) {
             return new ResponseDTO(400,e.getMessage());
@@ -124,6 +118,45 @@ public class ChatController {
                 }
             }
             return new ResponseDTO(200,chatRoomHashList);
+        }catch (Exception e) {
+            return new ResponseDTO(400,e.getMessage());
+        }
+    }
+    @GetMapping("/Tel/{userId}")
+    public ResponseDTO getAllTelegramList(@PathVariable("userId") String userId) {
+        try{
+            List<ChatRoom> chatRoomList=chatService.findAllRoom();
+            List<ChatRoom> returnRoomList = new ArrayList<>();
+            for(ChatListEntity entity : chatService.getRoomListByUserId(userId)) {
+               ChatRoom room = chatService.findByRoomId(entity.getRoomId());
+               for(ChatListEntity cle: chatService.getUserList(room.getRoomId())) {
+                   if(!Objects.equals(cle.getUserId(), userId)) {
+                       room.setUserName(cle.getUserName());
+                   }
+               }
+              returnRoomList.add(room);
+            }
+            return new ResponseDTO(200,returnRoomList);
+        }catch (Exception e) {
+            return new ResponseDTO(400,e.getMessage());
+        }
+    }
+    @GetMapping("/Room/RoomList")
+    public ResponseDTO getOpenedRoomList() {
+        try{
+            List<ChatRoom> chatRoomList = chatService.findRoomByMode("Opened");
+            System.out.println("개수 : "+chatRoomList.size());
+           return new ResponseDTO(200, chatRoomList);
+        }catch (Exception e) {
+            return new ResponseDTO(400,e.getMessage());
+        }
+    }
+    @GetMapping("/Room/TelList")
+    public ResponseDTO getOpenedTelList() {
+        try{
+            List<ChatRoom> chatRoomList = chatService.getTelByOpened();
+            System.out.println("개수 : "+chatRoomList.size());
+            return new ResponseDTO(200, chatRoomList);
         }catch (Exception e) {
             return new ResponseDTO(400,e.getMessage());
         }

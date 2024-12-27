@@ -18,7 +18,13 @@ public class ChatRoom {
     @Column
     private String roomName;
     @Column
+    private String description;
+    @Column
     private long userCount;
-
+    @Column
+    private String mode;
+    private String userName;
+    @Column
+    private boolean isTel;
 
 }

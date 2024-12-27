@@ -9,10 +9,9 @@ import java.util.List;
 
 @Repository
 public interface ChatRepository extends JpaRepository<ChatDTO,Long> {
-    List<ChatDTO> findChatDTOSByRoomId(String roomId);
-    ChatDTO findChatDTOById(Long chatId);
+    public List<ChatDTO> findChatDTOSByRoomId(String roomId);
+    public ChatDTO findChatDTOById(Long chatId);
 
-    void updateChatDTOById(ChatDTO chatDTO);
 
-    List<ChatDTO> findChatDTOSByBlock(boolean block);
+    public List<ChatDTO> findChatDTOSByBlock(boolean block);
 }

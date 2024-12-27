@@ -1,9 +1,6 @@
 package com.inu.esc.chat;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
@@ -11,6 +8,7 @@ import lombok.Data;
 @Data
 public class ChatListEntity {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
     @Column
     private String roomId;
@@ -18,4 +16,6 @@ public class ChatListEntity {
     private String userId;
     @Column
     private String userName;
+    @Column
+    private String profileUrl;
 }

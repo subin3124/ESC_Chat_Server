@@ -1,5 +1,6 @@
 package com.inu.esc.chat;
 
+import com.inu.esc.chat.DTO.ChatDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -19,4 +20,6 @@ public interface ChatUserListRepository extends JpaRepository<ChatListEntity,Str
     @Modifying
     @Query("delete ChatListEntity where roomId = :roomId")
     public void deleteUserByRoomId(@Param("roomId") String roomId);
+
+    public List<ChatListEntity> findChatListEntitiesByUserId(String userId);
 }

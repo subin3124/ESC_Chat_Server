@@ -23,9 +23,11 @@ public class ChatDTO {
     @Column
     private String userName;
     @Column
+    private String profileUrl;
+    @Column
     private String message;
     @Column
     private String time;
     @Column
-    private boolean isBlock;
+    private boolean block;
 }
