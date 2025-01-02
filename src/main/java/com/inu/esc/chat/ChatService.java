@@ -3,10 +3,16 @@ package com.inu.esc.chat;
 import com.inu.esc.chat.DTO.ChatDTO;
 import com.inu.esc.chat.DTO.ChatRoom;
 import com.inu.esc.chat.DTO.ResponseDTO;
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,7 +46,7 @@ public class ChatService {
        return chatUserListRepository.findChatListEntityByUserIdAndRoomId(userId,roomId);
     }
     public List<ChatRoom> getTelByOpened() {
-        return chatRoomRepository.findChatRoomsByModeAndisTel("Opened",true);
+        return chatRoomRepository.findChatRoomsByModeAndisTel("Opened",true); // 1 : telegram, 2 : roomChat
     }
     public List<ChatListEntity> getRoomListByUserId(String userId) {
         return chatUserListRepository.findChatListEntitiesByUserId(userId);
@@ -57,9 +63,22 @@ public class ChatService {
         chatListEntity.setRoomId(roomId);
         chatListEntity.setUserName(userName);
         chatListEntity.setUserId(userId);
-        chatUserListRepository.save(chatListEntity);
-        increaseUser(roomId);
+        if(roomId==null||userId==null) {
+            return "error";
+        }
+        if(!isExistUserInRoom(userId,roomId)) {
+            chatUserListRepository.save(chatListEntity);
+            increaseUser(roomId);
+        }
         return userId;
+    }
+    public byte[] ReturnImage(String imageurl) throws Exception{
+        InputStream in = new FileInputStream(imageurl);
+        return IOUtils.toByteArray(in);
+    }
+    public void RegisterImages(MultipartFile multipartFile, String userId) throws IOException {
+        multipartFile.transferTo(new File("profileImage/" + userId + ".png"));
+
     }
     public ResponseDTO getChatById(long chatId) {
         try{
@@ -107,6 +126,15 @@ public class ChatService {
     }
     public List<ChatListEntity> getUserList(String roomId) {
         return chatUserListRepository.findChatListEntitiesByRoomId(roomId);
+    }
+    @Transactional
+    public ResponseDTO updateProfile(ChatListEntity chatListEntity) {
+        try{
+            chatUserListRepository.updateProfile(chatListEntity.getRoomId(), chatListEntity.getUserId(), chatListEntity.getUserName());
+            return new ResponseDTO(200,"success");
+        }catch (Exception e) {
+            return new ResponseDTO(400,e.getMessage());
+        }
     }
     @Transactional
     public ResponseDTO setBlock(Long ChatId) {

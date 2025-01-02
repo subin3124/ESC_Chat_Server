@@ -45,10 +45,20 @@ public class ChatController {
     public ResponseDTO sendNotification(@RequestBody Notification notification) {
         try{
             Notification savedNotification = notificationService.saveNotification(notification);
-            simpMessagingTemplate.convertAndSend("/sub/notification",savedNotification);
+            simpMessagingTemplate.convertAndSend("/sub/notification",notification);
             return new ResponseDTO(200,notification);
         }catch (Exception e) {
             return new ResponseDTO(400,e.getMessage());
+        }
+    }
+    @PostMapping("/notification/{userId}")
+    public ResponseDTO sendNotificationToUser(@RequestBody Notification notification, @PathVariable("userId") String userId) {
+        try{
+            notificationService.saveNotification(notification);
+            simpMessagingTemplate.convertAndSend("/sub/notification/"+userId,notification);
+            return new ResponseDTO(200,"success");
+        }catch (Exception e) {
+            return new ResponseDTO(400, e.getMessage());
         }
     }
     @GetMapping("/notification")
@@ -100,6 +110,10 @@ public class ChatController {
             return new ResponseDTO(400,e.getMessage());
         }
     }
+    @PostMapping("/updateProfile")
+    public ResponseDTO updateProfile(@RequestBody ChatListEntity chatListEntity) {
+        return chatService.updateProfile(chatListEntity);
+    }
     @GetMapping("/Room/userId/{userId}")
     public ResponseDTO getAllRoomList(@PathVariable("userId") String userId) {
         try{
@@ -111,9 +125,9 @@ public class ChatController {
                 json.put("id", chatRoom.getRoomId());
                 json.put("title",chatRoom.getRoomName());
                 if(!chatService.isExistUserInRoom(userId, chatRoom.getRoomId())) {
-                    json.put("username","");
+                    json.put("userName","");
                 }else{
-                    json.put("username",chatService.getUserByUserId(userId, chatRoom.getRoomId()).getUserName());
+                    json.put("userName",chatService.getUserByUserId(userId, chatRoom.getRoomId()).getUserName());
                     chatRoomHashList.add(json);
                 }
             }
@@ -168,13 +182,21 @@ public class ChatController {
     @PostMapping("/JoinRoom")
     public ResponseDTO joinRoom(@RequestBody ChatListEntity chatListEntity) {
         try {
-           chatService.addUser(chatListEntity.getRoomId(), chatListEntity.getUserName(),chatListEntity.getUserId());
+           String adUsr = chatService.addUser(chatListEntity.getRoomId(), chatListEntity.getUserName(),chatListEntity.getUserId());
            HashMap<String,String> res = new HashMap<>();
+           if(adUsr == "error") {
+               return new ResponseDTO(400,"user name or roomId is null");
+           }
            return new ResponseDTO(200,"success");
         }catch (Exception e) {
             return new ResponseDTO(400,e.getMessage());
         }
     }
+    /*
+    @PostMapping("/updateProfile")
+    public ResponseDTO updateProfile() {
+
+    } */
     @PostMapping("/leaveRoom")
     public ResponseDTO leaveRoom(@RequestBody ChatListEntity chatListEntity) {
         return chatService.deleteUser(chatListEntity.getRoomId(), chatListEntity.getUserId());

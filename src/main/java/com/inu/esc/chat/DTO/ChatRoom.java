@@ -26,5 +26,7 @@ public class ChatRoom {
     private String userName;
     @Column
     private boolean isTel;
+    @Column
+    private String icon;
 
 }

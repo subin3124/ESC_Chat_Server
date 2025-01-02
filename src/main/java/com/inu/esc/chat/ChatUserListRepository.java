@@ -22,4 +22,8 @@ public interface ChatUserListRepository extends JpaRepository<ChatListEntity,Str
     public void deleteUserByRoomId(@Param("roomId") String roomId);
 
     public List<ChatListEntity> findChatListEntitiesByUserId(String userId);
+
+    @Modifying
+    @Query("update ChatListEntity set userName = :userName where roomId = :roomId and userId = :userId")
+    public void updateProfile(@Param("roomId") String roomId, @Param("userId") String userId, @Param("userName") String userName);
 }
