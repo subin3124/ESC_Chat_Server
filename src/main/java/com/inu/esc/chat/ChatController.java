@@ -41,7 +41,7 @@ public class ChatController {
         simpMessagingTemplate.convertAndSend("/sub/message/"+roomId,chatDTO);
         return chatDTO;
     }
-    @PostMapping("/notification/")
+    @PostMapping("/notification")
     public ResponseDTO sendNotification(@RequestBody Notification notification) {
         try{
             Notification savedNotification = notificationService.saveNotification(notification);
@@ -118,20 +118,16 @@ public class ChatController {
     public ResponseDTO getAllRoomList(@PathVariable("userId") String userId) {
         try{
             List<ChatRoom> chatRoomList=chatService.findAllRoom();
-            List<HashMap<String,String>> chatRoomHashList = new ArrayList<>();
+            List<ChatRoom> returnChatRoomList = new ArrayList<>();
             for(ChatRoom chatRoom : chatRoomList) {
-                HashMap<String,String> json= new HashMap<>();
-                chatService.getUserByUserId(userId, chatRoom.getRoomId());
-                json.put("id", chatRoom.getRoomId());
-                json.put("title",chatRoom.getRoomName());
                 if(!chatService.isExistUserInRoom(userId, chatRoom.getRoomId())) {
-                    json.put("userName","");
+                    return new ResponseDTO(300,null);
                 }else{
-                    json.put("userName",chatService.getUserByUserId(userId, chatRoom.getRoomId()).getUserName());
-                    chatRoomHashList.add(json);
+                    chatRoom.setLastMessage(chatService.getLastMessageByRoomId(chatRoom.getRoomId()).getMessage());
+                    returnChatRoomList.add(chatRoom);
                 }
             }
-            return new ResponseDTO(200,chatRoomHashList);
+            return new ResponseDTO(200,returnChatRoomList);
         }catch (Exception e) {
             return new ResponseDTO(400,e.getMessage());
         }
@@ -159,6 +155,9 @@ public class ChatController {
     public ResponseDTO getOpenedRoomList() {
         try{
             List<ChatRoom> chatRoomList = chatService.findRoomByMode("Opened");
+            for(ChatRoom chatRoom : chatRoomList) {
+                chatRoom.setLastMessage(chatService.getLastMessageByRoomId(chatRoom.getRoomId()).getMessage());
+            }
             System.out.println("개수 : "+chatRoomList.size());
            return new ResponseDTO(200, chatRoomList);
         }catch (Exception e) {

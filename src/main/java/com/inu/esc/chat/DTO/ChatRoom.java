@@ -23,10 +23,12 @@ public class ChatRoom {
     private long userCount;
     @Column
     private String mode;
+    @Column
+    private String hashTag;
     private String userName;
     @Column
     private boolean isTel;
     @Column
     private String icon;
-
+    private String lastMessage;
 }

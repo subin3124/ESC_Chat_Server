@@ -136,6 +136,16 @@ public class ChatService {
             return new ResponseDTO(400,e.getMessage());
         }
     }
+    public ChatDTO getLastMessageByRoomId(String roomId) {
+        try{
+           List<ChatDTO> lst =  chatRepository.findChatDTOSByRoomId(roomId);
+           return lst.get(lst.size()-1);
+        }catch (Exception e) {
+            ChatDTO dto = new ChatDTO();
+            dto.setMessage("");
+            return dto;
+        }
+    }
     @Transactional
     public ResponseDTO setBlock(Long ChatId) {
         try{
