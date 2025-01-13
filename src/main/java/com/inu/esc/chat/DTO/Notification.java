@@ -17,4 +17,6 @@ public class Notification {
     int mode;
     @Column
     String dateTime;
+    @Column
+    String userId;
 }

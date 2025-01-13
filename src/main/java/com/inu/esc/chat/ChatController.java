@@ -54,6 +54,7 @@ public class ChatController {
     @PostMapping("/notification/{userId}")
     public ResponseDTO sendNotificationToUser(@RequestBody Notification notification, @PathVariable("userId") String userId) {
         try{
+            notification.setUserId(userId);
             notificationService.saveNotification(notification);
             simpMessagingTemplate.convertAndSend("/sub/notification/"+userId,notification);
             return new ResponseDTO(200,"success");
@@ -121,7 +122,7 @@ public class ChatController {
             List<ChatRoom> returnChatRoomList = new ArrayList<>();
             for(ChatRoom chatRoom : chatRoomList) {
                 if(!chatService.isExistUserInRoom(userId, chatRoom.getRoomId())) {
-                    return new ResponseDTO(300,null);
+
                 }else{
                     chatRoom.setLastMessage(chatService.getLastMessageByRoomId(chatRoom.getRoomId()).getMessage());
                     returnChatRoomList.add(chatRoom);
@@ -136,17 +137,19 @@ public class ChatController {
     public ResponseDTO getAllTelegramList(@PathVariable("userId") String userId) {
         try{
             List<ChatRoom> chatRoomList=chatService.findAllRoom();
-            List<ChatRoom> returnRoomList = new ArrayList<>();
-            for(ChatListEntity entity : chatService.getRoomListByUserId(userId)) {
-               ChatRoom room = chatService.findByRoomId(entity.getRoomId());
-               for(ChatListEntity cle: chatService.getUserList(room.getRoomId())) {
-                   if(!Objects.equals(cle.getUserId(), userId)) {
-                       room.setUserName(cle.getUserName());
-                   }
-               }
-              returnRoomList.add(room);
+            List<ChatRoom> returnChatRoomList = new ArrayList<>();
+            for(ChatRoom chatRoom : chatRoomList) {
+                if(!chatService.isExistUserInRoom(userId, chatRoom.getRoomId())) {
+
+                }else{
+                    if(chatRoom.isTel()==false) {
+                        continue;
+                    }
+                    chatRoom.setLastMessage(chatService.getLastMessageByRoomId(chatRoom.getRoomId()).getMessage());
+                    returnChatRoomList.add(chatRoom);
+                }
             }
-            return new ResponseDTO(200,returnRoomList);
+            return new ResponseDTO(200,returnChatRoomList);
         }catch (Exception e) {
             return new ResponseDTO(400,e.getMessage());
         }
