@@ -62,13 +62,17 @@ public class ChatController {
             return new ResponseDTO(400, e.getMessage());
         }
     }
-    @GetMapping("/notification")
-    public ResponseDTO getNotification() {
+    @GetMapping("/notification/{userId}")
+    public ResponseDTO getNotification(@PathVariable("userId") String userId) {
         try{
-            return new ResponseDTO(200,notificationService.getAllNotifications());
+            return new ResponseDTO(200,notificationService.getAllNotifications(userId));
         }catch (Exception e) {
             return new ResponseDTO(400,e.getMessage());
         }
+    }
+    @DeleteMapping("/notification/{notiId}")
+    public ResponseDTO deleteNotification(@PathVariable("notiId") long notiId) {
+        return notificationService.deleteNotification(notiId);
     }
     @GetMapping("/Room/{roomId}")
     public ResponseDTO getRoomById(@PathVariable("roomId") String roomId) {
