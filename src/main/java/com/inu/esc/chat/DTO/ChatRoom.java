@@ -24,6 +24,8 @@ public class ChatRoom {
     @Column
     private String mode;
     @Column
+    private String type;
+    @Column
     private String hashTag;
     private String userName;
     @Column
