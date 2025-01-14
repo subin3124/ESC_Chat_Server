@@ -25,6 +25,6 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoom,String> {
     void deleteRoomById(@Param("roomId") String roomId);
     @Query(value = "select * from  chat_room where is_tel = :tel and mode = :mode",nativeQuery = true)
     List<ChatRoom> findChatRoomsByModeAndisTel(@Param("mode") String mode, @Param("tel") boolean isTel);
-    List<ChatRoom> findChatRoomsByMode(String mode);
+    List<ChatRoom> findChatRoomsByModeAndType(String mode,String roomType);
 
 }

@@ -31,8 +31,8 @@ public class ChatService {
     public ChatRoom findByRoomId(String roomId) {
         return chatRoomRepository.findChatRoomByRoomId(roomId);
     }
-    public List<ChatRoom> findRoomByMode(String mode) {
-        return chatRoomRepository.findChatRoomsByMode(mode);
+    public List<ChatRoom> findRoomByMode(String mode,String roomType) {
+        return chatRoomRepository.findChatRoomsByModeAndType(mode,roomType);
     }
     @Transactional
     public ChatRoom createChatRoom(ChatRoom chatRoom) {

@@ -119,10 +119,10 @@ public class ChatController {
     public ResponseDTO updateProfile(@RequestBody ChatListEntity chatListEntity) {
         return chatService.updateProfile(chatListEntity);
     }
-    @GetMapping("/Room/userId/{userId}")
-    public ResponseDTO getAllRoomList(@PathVariable("userId") String userId) {
+    @GetMapping("/Room/userId/{userId}/{roomType}")
+    public ResponseDTO getAllRoomList(@PathVariable("userId") String userId,@PathVariable("roomType") String roomType) {
         try{
-            List<ChatRoom> chatRoomList=chatService.findAllRoom();
+            List<ChatRoom> chatRoomList=chatService.findRoomByMode("Opened",roomType);
             List<ChatRoom> returnChatRoomList = new ArrayList<>();
             for(ChatRoom chatRoom : chatRoomList) {
                 if(!chatService.isExistUserInRoom(userId, chatRoom.getRoomId())) {
@@ -158,10 +158,10 @@ public class ChatController {
             return new ResponseDTO(400,e.getMessage());
         }
     }
-    @GetMapping("/Room/RoomList")
-    public ResponseDTO getOpenedRoomList() {
+    @GetMapping("/Room/RoomList/{roomType}")
+    public ResponseDTO getOpenedRoomList(@PathVariable String roomType) {
         try{
-            List<ChatRoom> chatRoomList = chatService.findRoomByMode("Opened");
+            List<ChatRoom> chatRoomList = chatService.findRoomByMode("Opened",roomType);
             for(ChatRoom chatRoom : chatRoomList) {
                 chatRoom.setLastMessage(chatService.getLastMessageByRoomId(chatRoom.getRoomId()).getMessage());
             }
